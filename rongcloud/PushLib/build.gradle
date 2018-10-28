@@ -1,0 +1,31 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group='com.gitlab.liyuanbiao'
+
+android {
+    compileSdkVersion compile_sdk_version
+    buildToolsVersion build_tools_version
+
+    defaultConfig {
+        minSdkVersion 16
+        //noinspection ExpiringTargetSdkVersion
+        targetSdkVersion 23
+        //noinspection HighAppVersionCode
+        versionCode 2018051019
+        versionName "2.8.32 Stable"
+    }
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+            assets.srcDirs = [
+                    'assets',
+                    './../PushLib/pushDaemon/executable'
+            ]
+            jniLibs.srcDirs = [
+                    'libs',
+                    './../PushLib/pushDaemon/libs'
+            ]
+        }
+    }
+}
