@@ -10,10 +10,12 @@ android {
     defaultConfig {
         minSdkVersion 16
         //noinspection ExpiringTargetSdkVersion
-        targetSdkVersion 22
-        versionCode 20180207
-        versionName "1.5.1"
+        targetSdkVersion 23
+        //noinspection HighAppVersionCode
+        versionCode 2018051019
+        versionName "2.8.32 Stable"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -21,15 +23,9 @@ android {
         }
     }
 
-    android {
-        lintOptions {
-            abortOnError false
-        }
-    }
-
 }
 
 dependencies {
-    api fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':rongcloud:IMKit')
 }
