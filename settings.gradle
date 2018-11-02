@@ -1,4 +1,6 @@
 include ':app'
-include ':rongcloud:IMLib', ':rongcloud:IMKit', ':rongcloud:MyKit',
-        ':rongcloud:CallLib', ':rongcloud:CallKit', ':rongcloud:RedPacket',
-        ':rongcloud:LocationLib',":rongcloud:PushLib",':rongcloud:IMUtil'
+include ':rongcloud:IMLib', ':rongcloud:IMKit',
+        ':rongcloud:CallLib', ':rongcloud:CallKit',
+        ':rongcloud:LocationLib', ":rongcloud:PushLib", ':rongcloud:RedPacket',
+        ':rongcloud:MCenter', ':rongcloud:RCSticker', ':rongcloud:Sight',
+        ':rongcloud:IMUtil'

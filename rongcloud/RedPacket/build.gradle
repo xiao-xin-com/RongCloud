@@ -1,18 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = 'com.gitlab.liyuanbiao'
-
+group = rootProject.ext.MAVEN_GROUP
 android {
     compileSdkVersion compile_sdk_version
     buildToolsVersion build_tools_version
 
     defaultConfig {
         minSdkVersion 16
-        //noinspection ExpiringTargetSdkVersion
-        targetSdkVersion 22
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 23
         versionCode 20180207
-        versionName "1.5.1"
+        versionName "2.0.0-valid2"
     }
     buildTypes {
         release {
@@ -22,6 +21,15 @@ android {
     }
 
     android {
+        sourceSets {
+            main {
+                res.srcDirs = ['src/main/res']
+                assets.srcDirs = ['src/main/assets']
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+                jni.srcDirs = []
+                jniLibs.srcDirs = ['src/main/libs']
+            }
+        }
         lintOptions {
             abortOnError false
         }

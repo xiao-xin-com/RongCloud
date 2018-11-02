@@ -16,9 +16,11 @@
             <option value="$PROJECT_DIR$/rongcloud/IMLib" />
             <option value="$PROJECT_DIR$/rongcloud/IMUtil" />
             <option value="$PROJECT_DIR$/rongcloud/LocationLib" />
-            <option value="$PROJECT_DIR$/rongcloud/MyKit" />
+            <option value="$PROJECT_DIR$/rongcloud/MCenter" />
             <option value="$PROJECT_DIR$/rongcloud/PushLib" />
+            <option value="$PROJECT_DIR$/rongcloud/RCSticker" />
             <option value="$PROJECT_DIR$/rongcloud/RedPacket" />
+            <option value="$PROJECT_DIR$/rongcloud/Sight" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

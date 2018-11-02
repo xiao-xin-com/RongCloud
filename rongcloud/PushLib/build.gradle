@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = 'com.gitlab.liyuanbiao'
+group = rootProject.ext.MAVEN_GROUP
 
 android {
     compileSdkVersion compile_sdk_version
@@ -15,21 +15,23 @@ android {
         versionCode 2018051019
         versionName "2.8.32 Stable"
     }
-    sourceSets {
-        main {
-            res.srcDirs = ['res']
-            assets.srcDirs = [
-                    'assets',
-                    './../PushLib/pushDaemon/executable'
-            ]
-            jniLibs.srcDirs = [
-                    'libs',
-                    './../PushLib/pushDaemon/libs'
-            ]
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs += 'pushDaemon/libs'
+            assets.srcDirs += 'pushDaemon/executable'
+        }
+    }
+
 }
 
 dependencies {
-    api fileTree(include: ['*.jar'], dir: 'libs')
+    api fileTree(dir: 'libs', include: ['*.jar'])
 }
