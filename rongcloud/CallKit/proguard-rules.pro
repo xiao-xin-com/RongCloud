@@ -15,3 +15,5 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep class cn.rongcloud.rtc.core.**  { *; }
+-keep class cn.rongcloud.rtc.engine.binstack.json.**  { *; }
