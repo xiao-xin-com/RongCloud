@@ -3,4 +3,4 @@ include ':rongcloud:IMLib', ':rongcloud:IMKit',
         ':rongcloud:CallLib', ':rongcloud:CallKit',
         ':rongcloud:LocationLib', ":rongcloud:PushLib", ':rongcloud:RedPacket',
         ':rongcloud:MCenter', ':rongcloud:RCSticker', ':rongcloud:Sight',
-        ':rongcloud:IMUtil'
+        ':rongcloud:IMUtil', ':rongcloud:RxIMLib'
