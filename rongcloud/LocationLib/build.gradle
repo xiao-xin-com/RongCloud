@@ -13,7 +13,7 @@ android {
         targetSdkVersion 23
         //noinspection HighAppVersionCode
         versionCode 2018051019
-        versionName "2.8.32 Stable"
+        versionName "2.9.7 Stable"
     }
 
     buildTypes {
