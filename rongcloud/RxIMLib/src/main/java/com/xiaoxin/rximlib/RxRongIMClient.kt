@@ -1,4 +1,5 @@
 @file:JvmName("RxRongIMClient")
+@file:JvmMultifileClass
 
 package com.xiaoxin.rximlib
 
@@ -28,27 +29,6 @@ fun init(context: Context) = RongIMClient.init(context)
  */
 fun init(context: Context, appKey: String) = RongIMClient.init(context, appKey)
 
-/**
- * <p>连接服务器，在整个应用程序全局，只需要调用一次，需在 {@link #init(Context)} 之后调用。</p>
- * <p>如果调用此接口遇到连接失败，SDK 会自动启动重连机制进行最多10次重连，分别是1, 2, 4, 8, 16, 32, 64, 128, 256, 512秒后。
- * 在这之后如果仍没有连接成功，还会在当检测到设备网络状态变化时再次进行重连。</p>
- *
- * @param token    从服务端获取的用户身份令牌（Token）。
- * @return RongIMClient  客户端核心类的实例。
- */
-fun connect(token: String): Single<String> = ConnectSingle(token)
-
-/**
- * <p>断开与融云服务器的连接。当调用此接口断开连接后，仍然可以接收 Push 消息。</p>
- * <p>若想断开连接后不接受 Push 消息，可以调用{@link #logout()}</p>
- */
-fun disconnect() = RongIMClient.getInstance().disconnect()
-
-/**
- * <p>断开与融云服务器的连接，并且不再接收 Push 消息。</p>
- * <p>若想断开连接后仍然接受 Push 消息，可以调用 {@link #disconnect()}</p>
- */
-fun logout() = RongIMClient.getInstance().logout()
 
 /**
  *
@@ -65,24 +45,6 @@ fun setOnReceiveMessageListener(
             }
             return@listener flag.invoke(message, left)
         }
-    }
-}
-
-internal class SendMessageCallback(
-    private val emitter: SingleEmitter<Message>
-) : IRongCallback.ISendMessageCallback {
-    override fun onAttached(message: Message?) = Unit
-    override fun onSuccess(message: Message?) {
-        emitter.takeUnless { it.isDisposed }
-            ?.onSuccess(message ?: return)
-    }
-
-    override fun onError(
-        message: Message?,
-        errorCode: RongIMClient.ErrorCode?
-    ) {
-        emitter.takeUnless { it.isDisposed }
-            ?.onError(ErrorCodeException(errorCode))
     }
 }
 
@@ -263,18 +225,6 @@ fun sendImageMessage(
             SendImageMessageCallback(emitter)
         )
     }, BackpressureStrategy.LATEST)
-}
-
-internal class RxResultCallback<T>(
-    private val emitter: SingleEmitter<T>
-) : RongIMClient.ResultCallback<T>() {
-    override fun onSuccess(t: T) {
-        emitter.takeUnless { it.isDisposed }?.onSuccess(t ?: return)
-    }
-
-    override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
-    }
 }
 
 /**
@@ -535,7 +485,6 @@ fun searchConversations(
 fun searchMessages(
     conversationType: Conversation.ConversationType,
     targetId: String,
-
     keyword: String,
     count: Int,
     beginTime: Long
@@ -555,19 +504,6 @@ fun searchMessages(
 //消息监听
 
 //更改消息状态
-
-internal class RxOperationCallback(
-    private val emitter: CompletableEmitter
-) : RongIMClient.OperationCallback() {
-    override fun onSuccess() {
-        emitter.takeUnless { it.isDisposed }?.onComplete()
-    }
-
-    override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
-    }
-}
-
 
 /**
  * 根据时间戳清除指定类型，目标Id 的某一会话消息未读状态。{@link Message#getSentTime()}在时间戳之前的消息将被置成已读。
@@ -852,6 +788,24 @@ fun getTextMessageDraft(
     }
 }
 
+
+/**
+ * 根据消息类型，targetId 删除某一会话的文字消息草稿
+ *
+ * @param conversationType 会话类型。
+ * @param targetId         目标 Id。根据不同的 conversationType，可能是用户 Id、群组 Id 或聊天室 Id。
+ * @return callback         删除草稿文字内容的回调。
+ */
+fun clearTextMessageDraft(
+    conversationType: Conversation.ConversationType,
+    targetId: String
+): Single<Boolean> {
+    return Single.create {
+        RongIMClient.getInstance()
+            .clearTextMessageDraft(conversationType, targetId, RxResultCallback(it))
+    }
+}
+
 /**
  * 设置某一会话为置顶或者取消置顶，回调方式获取设置是否成功。
  *
@@ -966,7 +920,6 @@ fun getBlacklistStatus(
     }
 }
 
-
 private class RxGetBlacklistCallback(
     private val emitter: SingleEmitter<Array<String>>
 ) : RongIMClient.GetBlacklistCallback() {
@@ -987,132 +940,6 @@ private class RxGetBlacklistCallback(
 fun getBlacklist(): Single<Array<String>> {
     return Single.create {
         RongIMClient.getInstance().getBlacklist(RxGetBlacklistCallback(it))
-    }
-}
-
-/**
-聊天室业务
-聊天室业务基本概念
-聊天室是指多个用户一起聊天，用户数量没有上限。和其它业务场景的主要区别如下：
-
-用户退出聊天界面后即视为离开聊天室，不会再接收到任何聊天室消息。
-
-聊天室消息不会保存到本地数据库，融云服务端最多保存聊天室最近的 50 条消息。客户端在调用加入聊天室接口时可以设置进入聊天室时的拉取消息数量。
-
-聊天室的会话关系由融云负责建立并保持连接，通过 SDK 相关接口，可以让用户加入或者退出聊天室。
- */
-
-/**
- * 加入聊天室。如果聊天室不存在，sdk 会创建聊天室并加入，如果已存在，则直接加入。加入聊天室时，可以选择拉取聊天室消息数目。
- *
- * @param chatRoomId      聊天室 Id。
- * @param defMessageCount 进入聊天室拉取消息数目，-1 时不拉取任何消息，0 时拉取 10 条消息，最多只能拉取 50 条。
- * @return callback        状态回调。
- */
-fun joinChatRoom(
-    chatRoomId: String,
-    defMessageCount: Int
-): Completable {
-    return Completable.create {
-        RongIMClient.getInstance()
-            .joinChatRoom(chatRoomId, defMessageCount, RxOperationCallback(it))
-    }
-}
-
-/**
- * 加入已存在的聊天室。如果聊天室不存在，则加入失败。加入聊天室时，可以选择拉取聊天室消息数目。
- *
- * @param chatRoomId      聊天室 Id。
- * @param defMessageCount 进入聊天室拉取消息数目，-1 时不拉取任何消息，0 时拉取 10 条消息，最多只能拉取 50 条。
- * @return callback        状态回调。
- */
-fun joinExistChatRoom(
-    chatRoomId: String,
-    defMessageCount: Int
-): Completable {
-    return Completable.create {
-        RongIMClient.getInstance()
-            .joinExistChatRoom(chatRoomId, defMessageCount, RxOperationCallback(it))
-    }
-}
-
-
-/**
- * 退出聊天室。
- *
- * @param chatRoomId 聊天室 Id。
- * @return callback   状态回调。
- */
-fun quitChatRoom(
-    chatRoomId: String
-): Completable {
-    return Completable.create {
-        RongIMClient.getInstance()
-            .quitChatRoom(chatRoomId, RxOperationCallback(it))
-    }
-}
-
-/**
- * 查询聊天室信息。回调中返回{@link ChatRoomInfo}
- *
- * @param chatRoomId     聊天室 Id。
- * @param defMemberCount 进入聊天室拉成员数目，最多 20 条。
- * @param order          按照何种顺序返回聊天室成员信息。升序, 返回最早加入的用户列表; 降序, 返回最晚加入的用户列表。{@link io.rong.imlib.model.ChatRoomInfo.ChatRoomMemberOrder}
- * @return callback       状态回调。
- */
-fun getChatRoomInfo(
-    chatRoomId: String,
-    defMemberCount: Int,
-    order: ChatRoomInfo.ChatRoomMemberOrder
-): Single<ChatRoomInfo> {
-    return Single.create {
-        RongIMClient.getInstance()
-            .getChatRoomInfo(chatRoomId, defMemberCount, order, RxResultCallback(it))
-    }
-}
-
-/*
-开通聊天室消息存储功能后，融云内置的文字、语音、图片、图文、位置、文件等消息会自动在服务器端进行存储，如果您的聊天室中用到了自定义类消息，可通过定义 MessageTag.ISPERSISTED 来设置消息是否进行存储。
-
-从服务器端获取聊天室历史消息的接口如下：
- */
-
-private class RxChatRoomHistoryMessageCallback(
-    private val emitter: SingleEmitter<List<Message>>
-) : IRongCallback.IChatRoomHistoryMessageCallback {
-    override fun onSuccess(list: MutableList<Message>?, p1: Long) {
-        emitter.takeUnless { it.isDisposed }?.onSuccess(list ?: listOf())
-    }
-
-    override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
-    }
-}
-
-/**
- * 获取聊天室历史消息记录。
- * 此方法从服务器端获取之前的历史消息，但是必须先开通聊天室消息云存储功能。
- * 如果指定时间 0,则从存储的第一条消息开始拉取。
- *
- * @param targetId   目标 Id。根据不同的 conversationType，可能是用户 Id、群组 Id。
- * @param recordTime 起始的消息发送时间戳，单位: 毫秒。
- * @param count      要获取的消息数量，count 大于 0 ，小于等于 200。
- * @param order      拉取顺序: 降序, 按照时间戳从大到小; 升序, 按照时间戳从小到大。
- */
-fun getChatroomHistoryMessages(
-    targetId: String,
-    recordTime: Long,
-    count: Int,
-    order: RongIMClient.TimestampOrder
-): Single<List<Message>> {
-    return Single.create {
-        RongIMClient.getInstance().getChatroomHistoryMessages(
-            targetId,
-            recordTime,
-            count,
-            order,
-            RxChatRoomHistoryMessageCallback(it)
-        )
     }
 }
 
@@ -1388,3 +1215,95 @@ fun setConnectionStatusListener(): Observable<RongIMClient.ConnectionStatusListe
     }
 }
 
+
+fun getMessage(messageId: Int): Single<Message> {
+    return Single.create {
+        RongIMClient.getInstance().getMessage(messageId, RxResultCallback(it))
+    }
+}
+
+@JvmOverloads
+fun insertOutgoingMessage(
+    type: Conversation.ConversationType,
+    targetId: String,
+    sentStatus: Message.SentStatus,
+    content: MessageContent,
+    sentTime: Long = System.currentTimeMillis()
+): Single<Message> {
+    return Single.create {
+        RongIMClient.getInstance().insertOutgoingMessage(
+            type,
+            targetId,
+            sentStatus,
+            content,
+            sentTime,
+            RxResultCallback(it)
+        )
+    }
+}
+
+@JvmOverloads
+fun insertIncomingMessage(
+    type: Conversation.ConversationType,
+    targetId: String,
+    senderUserId: String,
+    receivedStatus: Message.ReceivedStatus,
+    content: MessageContent,
+    sentTime: Long = System.currentTimeMillis()
+): Single<Message> {
+    return Single.create {
+        RongIMClient.getInstance().insertIncomingMessage(
+            type,
+            targetId,
+            senderUserId,
+            receivedStatus,
+            content,
+            sentTime,
+            RxResultCallback(it)
+        )
+    }
+}
+
+
+data class DownloadEvent(
+    val action: DownloadAction,
+    val id: String? = null,
+    val progress: Int? = null
+) {
+    enum class DownloadAction { ON_SUCCESS, ON_PROGRESS, ON_ERROR }
+}
+
+private class RxDownloadMediaCallback(
+    private val emitter: ObservableEmitter<DownloadEvent>
+) : RongIMClient.DownloadMediaCallback() {
+    override fun onSuccess(id: String?) {
+        emitter.takeUnless { it.isDisposed }
+            ?.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_SUCCESS, id = id))
+    }
+
+    override fun onProgress(progress: Int) {
+        emitter.takeUnless { it.isDisposed }
+            ?.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_PROGRESS, progress = progress))
+    }
+
+    override fun onError(errorCode: RongIMClient.ErrorCode?) {
+        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
+    }
+}
+
+fun downloadMedia(
+    conversationType: Conversation.ConversationType,
+    targetId: String,
+    mediaType: RongIMClient.MediaType,
+    imageUrl: String
+): Observable<DownloadEvent> {
+    return Observable.create {
+        RongIMClient.getInstance().downloadMedia(
+            conversationType,
+            targetId,
+            mediaType,
+            imageUrl,
+            RxDownloadMediaCallback(it)
+        )
+    }
+}
