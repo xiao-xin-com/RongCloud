@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-rootProject.ext.MAVEN_GROUP
+group = rootProject.ext.MAVEN_GROUP
 
 android {
     compileSdkVersion compile_sdk_version
@@ -21,6 +21,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    libraryVariants.all {
+        it.generateBuildConfig.enabled = false
     }
 
 }
