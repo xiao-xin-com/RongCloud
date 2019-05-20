@@ -30,13 +30,9 @@ fun setDiscussionName(
 private class RxCreateDiscussionCallback(
     private val emitter: SingleEmitter<String>
 ) : RongIMClient.CreateDiscussionCallback() {
-    override fun onSuccess(discussionId: String) {
-        emitter.takeUnless { it.isDisposed }?.onSuccess(discussionId)
-    }
-
-    override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
-    }
+    override fun onSuccess(discussionId: String) = emitter.onSuccess(discussionId)
+    override fun onError(errorCode: RongIMClient.ErrorCode?) =
+        emitter.onError(ErrorCodeException(errorCode))
 }
 
 

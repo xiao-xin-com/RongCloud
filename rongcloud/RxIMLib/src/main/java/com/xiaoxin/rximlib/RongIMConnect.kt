@@ -6,6 +6,7 @@ package com.xiaoxin.rximlib
 import io.reactivex.Single
 import io.reactivex.SingleObserver
 import io.reactivex.disposables.Disposable
+import io.reactivex.plugins.RxJavaPlugins
 import io.rong.imlib.RongIMClient
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -48,6 +49,9 @@ internal class ConnectSingle(private val token: String) : Single<String>() {
         private val observer: SingleObserver<in String>
     ) : RongIMClient.ConnectCallback(), Disposable {
         private val flag = AtomicBoolean()
+        override fun isDisposed(): Boolean = flag.get()
+        override fun dispose(): Unit = flag.set(true)
+
         override fun onSuccess(userid: String?) {
             if (!isDisposed && userid != null) {
                 observer.onSuccess(userid)
@@ -55,18 +59,22 @@ internal class ConnectSingle(private val token: String) : Single<String>() {
         }
 
         override fun onError(errorCode: RongIMClient.ErrorCode?) {
-            observer.takeUnless { isDisposed }
-                ?.onError(ErrorCodeException(errorCode))
+            val e = ErrorCodeException(errorCode)
+            if (!isDisposed) {
+                observer.onError(e)
+            } else {
+                RxJavaPlugins.onError(e)
+            }
         }
 
         override fun onTokenIncorrect() {
-            observer.takeUnless { isDisposed }
-                ?.onError(TokenIncorrectException(token))
+            val e = TokenIncorrectException(token)
+            if (!isDisposed) {
+                observer.onError(e)
+            } else {
+                RxJavaPlugins.onError(e)
+            }
         }
-
-        override fun isDisposed(): Boolean = flag.get()
-
-        override fun dispose(): Unit = flag.set(true)
 
     }
 }

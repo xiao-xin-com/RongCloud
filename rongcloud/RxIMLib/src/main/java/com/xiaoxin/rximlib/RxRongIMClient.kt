@@ -5,11 +5,13 @@ package com.xiaoxin.rximlib
 
 import android.content.Context
 import io.reactivex.*
-import io.rong.imlib.IRongCallback
 import io.rong.imlib.RongCommonDefine
 import io.rong.imlib.RongIMClient
 import io.rong.imlib.TypingMessage.TypingStatus
-import io.rong.imlib.model.*
+import io.rong.imlib.model.Conversation
+import io.rong.imlib.model.Message
+import io.rong.imlib.model.MessageContent
+import io.rong.imlib.model.SearchConversationResult
 import io.rong.message.RecallNotificationMessage
 
 
@@ -39,7 +41,7 @@ fun setOnReceiveMessageListener(
 ): Observable<Message> {
     return Observable.create { emitter ->
         RongIMClient.setOnReceiveMessageListener listener@{ message, left ->
-            emitter.takeUnless { it.isDisposed }?.onNext(message)
+            emitter.onNext(message)
             emitter.setCancellable {
                 RongIMClient.setOnReceiveMessageListener(null)
             }
@@ -156,42 +158,38 @@ internal class SendImageMessageCallback(
 ) : RongIMClient.SendImageMessageCallback() {
 
     override fun onSuccess(message: Message) {
-        emitter.takeUnless { it.isCancelled }
-            ?.apply {
-                onNext(
-                    SendImageMessageEvent(
-                        SendImageMessageEvent.Type.ON_SUCCESS,
-                        message = message
-                    )
-                )
-                onComplete()
-            }
-    }
-
-    override fun onAttached(message: Message?) {
-        emitter.takeUnless { it.isCancelled }
-            ?.onNext(
+        emitter.apply {
+            onNext(
                 SendImageMessageEvent(
-                    SendImageMessageEvent.Type.ON_ATTACHED,
+                    SendImageMessageEvent.Type.ON_SUCCESS,
                     message = message
                 )
             )
+            onComplete()
+        }
+    }
+
+    override fun onAttached(message: Message?) {
+        emitter.onNext(
+            SendImageMessageEvent(
+                SendImageMessageEvent.Type.ON_ATTACHED,
+                message = message
+            )
+        )
     }
 
     override fun onProgress(message: Message?, progress: Int) {
-        emitter.takeUnless { it.isCancelled }
-            ?.onNext(
-                SendImageMessageEvent(
-                    SendImageMessageEvent.Type.ON_PROGRESS,
-                    message = message,
-                    progress = progress
-                )
+        emitter.onNext(
+            SendImageMessageEvent(
+                SendImageMessageEvent.Type.ON_PROGRESS,
+                message = message,
+                progress = progress
             )
+        )
     }
 
     override fun onError(message: Message?, errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isCancelled }
-            ?.onError(ErrorCodeException(errorCode))
+        emitter.onError(ErrorCodeException(errorCode))
     }
 
 }
@@ -1277,17 +1275,15 @@ private class RxDownloadMediaCallback(
     private val emitter: ObservableEmitter<DownloadEvent>
 ) : RongIMClient.DownloadMediaCallback() {
     override fun onSuccess(id: String?) {
-        emitter.takeUnless { it.isDisposed }
-            ?.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_SUCCESS, id = id))
+        emitter.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_SUCCESS, id = id))
     }
 
     override fun onProgress(progress: Int) {
-        emitter.takeUnless { it.isDisposed }
-            ?.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_PROGRESS, progress = progress))
+        emitter.onNext(DownloadEvent(DownloadEvent.DownloadAction.ON_PROGRESS, progress = progress))
     }
 
     override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
+        emitter.onError(ErrorCodeException(errorCode))
     }
 }
 

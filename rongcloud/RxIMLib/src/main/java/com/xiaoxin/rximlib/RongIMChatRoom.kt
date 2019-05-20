@@ -102,13 +102,8 @@ fun getChatRoomInfo(
 private class RxChatRoomHistoryMessageCallback(
     private val emitter: SingleEmitter<List<Message>>
 ) : IRongCallback.IChatRoomHistoryMessageCallback {
-    override fun onSuccess(list: MutableList<Message>?, p1: Long) {
-        emitter.takeUnless { it.isDisposed }?.onSuccess(list ?: listOf())
-    }
-
-    override fun onError(errorCode: RongIMClient.ErrorCode?) {
-        emitter.takeUnless { it.isDisposed }?.onError(ErrorCodeException(errorCode))
-    }
+    override fun onSuccess(list: MutableList<Message>?, p1: Long) = emitter.onSuccess(list ?: listOf())
+    override fun onError(errorCode: RongIMClient.ErrorCode?) = emitter.onError(ErrorCodeException(errorCode))
 }
 
 
@@ -140,35 +135,23 @@ fun getChatroomHistoryMessages(
 }
 
 
-enum class ChatRoomAction { ON_JOINING, ON_JOINED, ON_QUITED }
-data class ChatRoomEvent(val action: ChatRoomAction, val userId: String?)
+data class ChatRoomEvent(val action: Action, val userId: String?) {
+    enum class Action { ON_JOINING, ON_JOINED, ON_QUITED }
+}
 
 class ChatRoomException(
-    val userId: String?, errorCode: RongIMClient.ErrorCode?
+    val userId: String?,
+    errorCode: RongIMClient.ErrorCode?
 ) : ErrorCodeException(errorCode)
 
 fun setChatRoomActionListener(): Observable<ChatRoomEvent> {
     return Observable.create { emitter ->
         RongIMClient.setChatRoomActionListener(object : RongIMClient.ChatRoomActionListener {
-            override fun onJoining(id: String?) {
-                emitter.takeUnless { it.isDisposed }
-                    ?.onNext(ChatRoomEvent(ChatRoomAction.ON_JOINING, id))
-            }
-
-            override fun onJoined(id: String?) {
-                emitter.takeUnless { it.isDisposed }
-                    ?.onNext(ChatRoomEvent(ChatRoomAction.ON_JOINED, id))
-            }
-
-            override fun onQuited(id: String?) {
-                emitter.takeUnless { it.isDisposed }
-                    ?.onNext(ChatRoomEvent(ChatRoomAction.ON_QUITED, id))
-            }
-
-            override fun onError(id: String?, errorCode: RongIMClient.ErrorCode?) {
-                emitter.takeUnless { it.isDisposed }
-                    ?.onError(ChatRoomException(id, errorCode))
-            }
+            override fun onJoining(id: String?) = emitter.onNext(ChatRoomEvent(ChatRoomEvent.Action.ON_JOINING, id))
+            override fun onJoined(id: String?) = emitter.onNext(ChatRoomEvent(ChatRoomEvent.Action.ON_JOINED, id))
+            override fun onQuited(id: String?) = emitter.onNext(ChatRoomEvent(ChatRoomEvent.Action.ON_QUITED, id))
+            override fun onError(id: String?, errorCode: RongIMClient.ErrorCode?) =
+                emitter.onError(ChatRoomException(id, errorCode))
         })
         emitter.setCancellable { RongIMClient.setChatRoomActionListener(null) }
     }
