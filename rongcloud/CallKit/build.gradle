@@ -31,6 +31,6 @@ dependencies {
     implementation "com.android.support:support-v4:$support_version"
     api project(':rongcloud:IMKit')
     api project(':rongcloud:CallLib')
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
     implementation 'com.google.code.gson:gson:2.8.5'
 }
