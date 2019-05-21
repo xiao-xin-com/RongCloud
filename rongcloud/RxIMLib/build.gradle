@@ -3,19 +3,19 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = rootProject.ext.MAVEN_GROUP
+group = deps.maven_group
 
 android {
-    compileSdkVersion compile_sdk_version
-    buildToolsVersion build_tools_version
+    compileSdkVersion build_versions.compile_sdk
+    buildToolsVersion build_versions.build_tools
 
     defaultConfig {
         minSdkVersion 16
         //noinspection ExpiringTargetSdkVersion
-        targetSdkVersion 23
+        targetSdkVersion build_versions.target_sdk
         //noinspection HighAppVersionCode
-        versionCode 2018051019
-        versionName "2.9.7 Stable"
+        versionCode build_versions.version_code
+        versionName build_versions.version_name
         consumerProguardFiles 'proguard-rules.pro'
     }
 
@@ -35,9 +35,9 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':rongcloud:IMLib')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api 'io.reactivex.rxjava2:rxjava:2.2.8'
-    api 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation deps.kotlin.stdlib
+    api deps.rxjava2.rxjava
+    api deps.rxjava2.rxandroid
 }
 repositories {
     mavenCentral()

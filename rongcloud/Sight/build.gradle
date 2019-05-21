@@ -1,18 +1,18 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = rootProject.ext.MAVEN_GROUP
+group = deps.maven_group
 android {
-    compileSdkVersion compile_sdk_version
-    buildToolsVersion build_tools_version
+    compileSdkVersion build_versions.compile_sdk
+    buildToolsVersion build_versions.build_tools
 
     defaultConfig {
         minSdkVersion 16
         //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 19
+        targetSdkVersion build_versions.target_sdk
         //noinspection HighAppVersionCode
-        versionCode 2018101821
-        versionName "2.9.7 Stable"
+        versionCode build_versions.version_code
+        versionName build_versions.version_name
     }
     buildTypes {
         release {
