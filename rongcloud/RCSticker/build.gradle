@@ -37,12 +37,8 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     api project(':rongcloud:IMKit')
-    implementation deps.support.appcompat_v7
-    implementation deps.gson
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
+    api deps.support.appcompat_v7
+    api deps.gson
 
 }
 

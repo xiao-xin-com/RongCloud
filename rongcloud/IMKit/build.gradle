@@ -13,6 +13,7 @@ android {
         //noinspection HighAppVersionCode
         versionCode build_versions.version_code
         versionName build_versions.version_name
+        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
@@ -38,6 +39,8 @@ android {
 dependencies {
     api fileTree(dir: 'src/main/libs', include: ['*.jar'])
     implementation deps.support.v4
+    api deps.isoparser
+    api deps.support.exifinterface
     api project(':rongcloud:IMLib')
 }
 

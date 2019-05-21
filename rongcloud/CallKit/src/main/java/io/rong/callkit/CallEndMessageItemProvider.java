@@ -86,6 +86,7 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
                 break;
             case HANGUP:
             case REMOTE_HANGUP:
+//            case CONN_USER_BLOCKED:
                 msgContent = v.getResources().getString(R.string.rc_voip_call_time_length);
                 msgContent += content.getExtra();
                 break;

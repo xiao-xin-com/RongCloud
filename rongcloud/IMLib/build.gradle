@@ -28,6 +28,7 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     implementation deps.support.compat
+    implementation deps.gson
 }
 
 repositories {

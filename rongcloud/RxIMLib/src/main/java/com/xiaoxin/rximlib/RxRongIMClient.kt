@@ -7,11 +7,11 @@ import android.content.Context
 import io.reactivex.*
 import io.rong.imlib.RongCommonDefine
 import io.rong.imlib.RongIMClient
-import io.rong.imlib.TypingMessage.TypingStatus
 import io.rong.imlib.model.Conversation
 import io.rong.imlib.model.Message
 import io.rong.imlib.model.MessageContent
 import io.rong.imlib.model.SearchConversationResult
+import io.rong.imlib.typingmessage.TypingStatus
 import io.rong.message.RecallNotificationMessage
 
 

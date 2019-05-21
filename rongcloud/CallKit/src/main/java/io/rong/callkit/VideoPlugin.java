@@ -1,6 +1,5 @@
 package io.rong.callkit;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -67,7 +65,7 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
     private void startVideoActivity(final RongExtension extension) {
 
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
-        if (profile != null && profile.getActiveTime() > 0) {
+        if (profile != null && profile.getStartTime() > 0) {
             Toast.makeText(context,
                     profile.getMediaType() == RongCallCommon.CallMediaType.AUDIO ?
                             context.getString(R.string.rc_voip_call_audio_start_fail) :

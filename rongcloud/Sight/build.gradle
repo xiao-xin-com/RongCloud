@@ -13,6 +13,7 @@ android {
         //noinspection HighAppVersionCode
         versionCode build_versions.version_code
         versionName build_versions.version_name
+        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {

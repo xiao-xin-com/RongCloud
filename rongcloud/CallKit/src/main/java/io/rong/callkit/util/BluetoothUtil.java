@@ -16,13 +16,13 @@ import android.net.NetworkInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.bailingcloud.bailingvideo.engine.binstack.util.FinLog;
-
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+
+import io.rong.common.RLog;
 
 import static android.content.Context.AUDIO_SERVICE;
 
@@ -272,5 +272,19 @@ public class BluetoothUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 是否支持蓝牙
+     * @return
+     */
+    public static boolean isSupportBluetooth(){
+        boolean bool=false;
+        BluetoothAdapter bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        if(null!=bluetoothAdapter){
+            bool=true;
+        }
+        RLog.i(TAG,"isSupportBluetooth = "+bool);
+        return bool;
     }
 }
