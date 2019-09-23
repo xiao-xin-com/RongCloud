@@ -42,6 +42,7 @@ dependencies {
     api deps.isoparser
     api deps.support.exifinterface
     api project(':rongcloud:IMLib')
+    api deps.glide
 }
 
 repositories {

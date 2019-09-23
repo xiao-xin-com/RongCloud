@@ -36,6 +36,7 @@
         android:layout_weight="1"
         android:maxHeight="3dp"
         android:minHeight="3dp"
+        android:thumbOffset="0dp"
         android:thumb="@drawable/rc_ic_sight_seek_bar_thumb" />
 
 

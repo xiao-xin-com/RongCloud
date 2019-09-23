@@ -38,8 +38,6 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     api project(':rongcloud:IMKit')
     api deps.support.appcompat_v7
-    api deps.gson
-
 }
 
 //生成 jar 名字
@@ -50,7 +48,7 @@ def OUTPUT_PATH = "build/libs/"
 //执行 gradle makeJar 后生成发布的 Sight.jar
 task makeJar(type: Jar) {
     //Sight.jar
-    from zipTree(file('build/intermediates/bundles/release/classes.jar'))
+    from zipTree(file('build/intermediates/intermediate-jars/release/classes.jar'))
 
     //去除编译生成的临时文件
     exclude('**/BuildConfig.class')

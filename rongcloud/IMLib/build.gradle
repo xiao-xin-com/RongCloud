@@ -20,7 +20,7 @@ android {
         main {
             manifest.srcFile 'AndroidManifest.xml'
             res.srcDirs = ['res']
-            jniLibs.srcDirs = ['libs', 'libsqlite']
+            jniLibs.srcDirs = ['libs']
         }
     }
 }

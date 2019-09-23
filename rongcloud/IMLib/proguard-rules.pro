@@ -26,6 +26,7 @@
 
 # RongCloud SDK
 -keep class io.rong.** {*;}
+-keep class cn.rongcloud.** {*;}
 -keep class * implements io.rong.imlib.model.MessageContent {*;}
 -dontwarn io.rong.push.**
 -dontnote com.xiaomi.**

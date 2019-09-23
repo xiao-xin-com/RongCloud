@@ -53,10 +53,26 @@ public class RongCallModule implements IExternalModule {
                         CallSTerminateMessage message = new CallSTerminateMessage();
                         message.setReason(reason);
                         message.setMediaType(callSession.getMediaType());
-                        message.setDirection("MT"); //丢失的消息都是他人的消息
-                        io.rong.imlib.model.Message.ReceivedStatus receivedStatus = new io.rong.imlib.model.Message.ReceivedStatus(0);
-                        receivedStatus.setRead();
-                        RongIM.getInstance().insertIncomingMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getInviterUserId(), receivedStatus, message, 0, null);
+
+                        String extra;
+                        long time = (callSession.getEndTime() - callSession.getStartTime()) / 1000;
+                        if (time >= 3600) {
+                            extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
+                        } else {
+                            extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
+                        }
+                        message.setExtra(extra);
+
+                        String senderId = callSession.getInviterUserId();
+                        if (senderId.equals(callSession.getSelfUserId())) {
+                            message.setDirection("MO");
+                            RongIM.getInstance().insertOutgoingMessage(Conversation.ConversationType.PRIVATE, callSession.getTargetId(), io.rong.imlib.model.Message.SentStatus.SENT, message, callSession.getStartTime(), null);
+                        } else {
+                            message.setDirection("MT");
+                            io.rong.imlib.model.Message.ReceivedStatus receivedStatus = new io.rong.imlib.model.Message.ReceivedStatus(0);
+                            receivedStatus.setRead();
+                            RongIM.getInstance().insertIncomingMessage(Conversation.ConversationType.PRIVATE, callSession.getTargetId(), senderId, receivedStatus, message, callSession.getStartTime(), null);
+                        }
                     } else if (callSession.getConversationType() == Conversation.ConversationType.GROUP) {
                         MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
                         multiCallEndMessage.setReason(reason);
@@ -65,7 +81,7 @@ public class RongCallModule implements IExternalModule {
                         } else if (callSession.getMediaType() == RongCallCommon.CallMediaType.VIDEO) {
                             multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
                         }
-                        RongIM.getInstance().insertMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getCallerUserId(), multiCallEndMessage, 0, null);
+                        RongIM.getInstance().insertMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getCallerUserId(), multiCallEndMessage, callSession.getStartTime(), null);
                     }
                 }
                 if (missedListener != null) {
@@ -81,10 +97,17 @@ public class RongCallModule implements IExternalModule {
 
     @Override
     public void onConnected(String token) {
+        /**
+         * 是否纹理采集,默认是
+         * * @param isTexture 设置视频采集方式 :
+         * true:texture方式采集，该采集模式下回调方法返回对象{@link io.rong.rongcall.CallVideoFrame}中视频数据体现在{@link io.rong.rongcall.CallVideoFrame#oesTextureId},而{@link io.rong.rongcall.CallVideoFrame#data}byte数据为空;
+         * false:yuv方式采集，该采集模式下回调方法返回对象{@link io.rong.rongcall.CallVideoFrame}中视频数据体现在{@link io.rong.rongcall.CallVideoFrame#data},而{@link io.rong.rongcall.CallVideoFrame#oesTextureId}oesTextureId为0;
+         */
+        RongCallClient.getInstance().setCaptureType(true);
         RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
         // 开启音视频日志，如果不需要开启，则去掉下面这句。
         RongCallClient.getInstance().setEnablePrintLog(true);
-        RongCallClient.getInstance().setVideoProfile(RongCallCommon.CallVideoProfile.VIDEO_PROFILE_720P);
+        RongCallClient.getInstance().setVideoProfile(RongCallCommon.CallVideoProfile.VD_480x640_15f);
     }
 
     @Override
