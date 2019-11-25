@@ -28,10 +28,10 @@ rxjava2.rxkotlin = 'io.reactivex.rxjava2:rxkotlin:2.4.0'
 deps.rxjava2 = rxjava2
 
 def xfyun = [:]
-xfyun.msc = "com.github.mliyuanbiao.xfyun:msc:$versions.xfyun"
-xfyun.msc_offline = "com.github.mliyuanbiao.xfyun:msc_offline:$versions.xfyun"
-xfyun.rxmsc = "com.github.mliyuanbiao.xfyun:rxmsc:$versions.xfyun"
-xfyun.rxaudio = "com.github.mliyuanbiao.xfyun:rxaudio:$versions.xfyun"
+xfyun.msc = "com.github.xiao-xin-com.xfyun:msc:$versions.xfyun"
+xfyun.msc_offline = "com.github.xiao-xin-com.xfyun:msc_offline:$versions.xfyun"
+xfyun.rxmsc = "com.github.xiao-xin-com.xfyun:rxmsc:$versions.xfyun"
+xfyun.rxaudio = "com.github.xiao-xin-com.xfyun:rxaudio:$versions.xfyun"
 deps.xfyun = xfyun
 
 def test = [:]
@@ -52,4 +52,4 @@ build_versions.version_code = 2019091718
 build_versions.version_name = '2.9.24-Stable'
 ext.build_versions = build_versions
 
-deps.maven_group = 'com.github.mliyuanbiao'
+deps.maven_group = 'com.github.xiao-xin-com'
